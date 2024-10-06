@@ -1,6 +1,9 @@
 notebook==7.2.2
-numpy==2.1.1
+numpy==2.0
 pandas==2.2.3
 obspy==1.4.1
 datetime==5.5
 matplotlib==3.9.2
+PyQt5==5.15.10
+scipy==1.14.1
+
