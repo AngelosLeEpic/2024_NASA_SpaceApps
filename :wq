@@ -1,0 +1,35 @@
+# Import libraries
+import numpy as np
+import pandas as pd
+from obspy import read
+from datetime import datetime, timedelta
+import matplotlib.pyplot as plt
+import os
+
+# data path = where we store the data, plots and catalogue
+data_path = "./data/lunar/training/"
+raw_data_path = data_path + "data/S12_GradeA/"
+catalogue_path = data_path + "catalogs/apollo12_catalog_GradeA_final.csv"
+
+df = pd.read_csv(catalogue_path)
+filenames = df["filename"]
+
+tmp = pd.read_csv(raw_data_path + filename.to_list()[0] + ".csv")
+str_name = "velocity(m/s)"
+
+get_seismic_events(tmp, str_name)
+
+def get_seismic_events(df: pd.DataFrame, velocity_col: str) -> list[pd.DataFrame]:
+    df[velocity_col] = df[velocity_col].abs()
+    df.plot()
+    plt.show()
+    tmp = tmp.reset_index()
+    tmp["STA"] = tmp["velocity(m/s)"].rolling(window=1000).mean()        # tmp["velocity(m/s)"].rolling(window=10000).mean().plot(color="g")
+    median = tmp["velocity(m/s)"].median() * 4
+    tmp["velocity(m/s) and median] = tmp["velocity(m/s)"].apply(lambda x: x+med)
+    tmp["b"] = tmp["velocity(m/s) and median"].rolling(window=20000).mean()
+    this = tmp[tmp.a > tmp.b]
+
+    start = this.idxmin().iloc[0] - 5000
+    end = this.idxmax().iloc[0] + 20000
+    tmp = tmp.iloc[start:end]
