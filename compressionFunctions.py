@@ -36,11 +36,48 @@ def computeError(originalData, decompressedData):
     residualErrorPercentage = 100*(residuals / originalData)
     return residualErrorPercentage.mean()
 
+def compressFile(fileAddress):
+    print("Now trying to compress: ",fileAddress)
+    data = pd.read_csv(fileAddress)
+    compressedData = applyScale(data["velocity(m/s)"])
+    originalData = data["velocity(m/s)"]
+    
+    counter = 1
+    # rewrite this function for optimization pls
+    while(computeError(originalData, removeScale(compressedData[0],compressedData[1],compressedData[2])) < 0.0475):
+        compressedData[0] = compressedData[0].round(32 - counter)
+        counter += 1
+
+    print("MSE: ",computeError(originalData, removeScale(compressedData[0],compressedData[1],compressedData[2])))
+
+    decimalPlaces = 32 - counter + 1
+    print("Decimal multiplication is: ", decimalPlaces)
+
+    compressedData[0] *= 10**(decimalPlaces)
+    
+    finalData = pd.concat([data["time_rel(sec)"], pd.Series(compressedData[0])], axis=1)
+    timestamp = data["time_abs(%Y-%m-%dT%H:%M:%S.%f)"].iloc[0]
+
+    meta = open(raw_data_path + i + "_METADATA", 'w')
+
+    meta.write(str(compressedData[1]) + "\n" + str(compressedData[2]))
+    # Metadata file contents:
+    # 1: value of lowest value on the decompressed data set
+    # 2: data set normalisation factor
+
+    print("metadata folder written")
+    finalData.to_csv(raw_data_path + "Compressed_" + i +"_" + str(decimalPlaces) + "_"+ timestamp + ".csv", sep=',', index=False)
+    print("Compressing complete")
+    
+    
+
 for i in filenames.to_list():
     if os.path.exists(raw_data_path+i+".csv"):
         # dfs.append(pd.read_csv(raw_data_path + i + ".csv"))
         print("Now compressing file: " + raw_data_path + i + ".csv")
         data = pd.read_csv(raw_data_path + i + ".csv")
+        compressFile(raw_data_path + i + ".csv")
+        continue
         data["velocity(m/s)"].plot()
         #plt.show()
         
@@ -67,7 +104,4 @@ for i in filenames.to_list():
         
         finalData.to_csv(raw_data_path + "Metadata_" + i +"_" + str(decimalPlaces) + "_"+ timestamp + ".csv", sep=',', index=False)
         print("Compressing complete")
-        
-        
-
         
