@@ -39,6 +39,7 @@ def computeError(originalData, decompressedData):
 for i in filenames.to_list():
     if os.path.exists(raw_data_path+i+".csv"):
         # dfs.append(pd.read_csv(raw_data_path + i + ".csv"))
+        print("Now compressing file: " + raw_data_path + i + ".csv")
         data = pd.read_csv(raw_data_path + i + ".csv")
         data["velocity(m/s)"].plot()
         #plt.show()
@@ -49,13 +50,13 @@ for i in filenames.to_list():
         counter = 1
         # rewrite this function for optimization pls
         while(computeError(originalData, removeScale(compressedData[0],compressedData[1],compressedData[2])) < 0.0475):
-            compressedData[0] = compressedData[0].round(64 - counter)
+            compressedData[0] = compressedData[0].round(32 - counter)
             counter += 1
 
-        print("final error: ",computeError(originalData, removeScale(compressedData[0],compressedData[1],compressedData[2])))
+        print("MSE: ",computeError(originalData, removeScale(compressedData[0],compressedData[1],compressedData[2])))
 
-        decimalPlaces = 64 - counter + 1
-        print("decimals is: ", decimalPlaces)
+        decimalPlaces = 32 - counter + 1
+        print("Decimal multiplication is: ", decimalPlaces)
 
         compressedData[0] *= 10**(decimalPlaces)
         
@@ -63,8 +64,9 @@ for i in filenames.to_list():
         timestamp = data["time_abs(%Y-%m-%dT%H:%M:%S.%f)"].iloc[0]
 
 
-
+        
         finalData.to_csv(raw_data_path + "Metadata_" + i +"_" + str(decimalPlaces) + "_"+ timestamp + ".csv", sep=',', index=False)
+        print("Compressing complete")
         
         
 
