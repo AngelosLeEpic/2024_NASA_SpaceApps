@@ -68,8 +68,22 @@ def compressFile(fileAddress):
     print("metadata folder written")
     finalData.to_csv(raw_data_path + "Compressed_" + i +"_" + str(decimalPlaces) + "_"+ timestamp + ".csv", sep=',', index=False)
     print("Compressing complete")
+
     
+# This function takes in the name of the compressed file (without the .csv at the end!!!)
+# looks for the metadata and uses them to regain the original data
+def decompressFile(file):
+    print(file)
+    compressedData = pd.read_csv(file + ".csv")
+    print(compressedData)
+    metaData = open(file + "_METADATA", 'r')
+    metaData = metaData.read()
+    flat = float(metaData.split('\n')[0])
+    scale = float(metaData.split('\n')[1])
+    print(flat, " ", scale)
+    return (compressedData * scale) + flat
     
+
 
 for i in filenames.to_list():
     if os.path.exists(raw_data_path+i+".csv"):
@@ -77,6 +91,10 @@ for i in filenames.to_list():
         print("Now compressing file: " + raw_data_path + i + ".csv")
         data = pd.read_csv(raw_data_path + i + ".csv")
         compressFile(raw_data_path + i + ".csv")
+        decomp = decompressFile(raw_data_path + i)
+        decomp.plot()
+        plt.show()
+
         continue
         data["velocity(m/s)"].plot()
         #plt.show()
