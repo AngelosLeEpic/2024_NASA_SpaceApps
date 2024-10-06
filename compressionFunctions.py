@@ -27,49 +27,47 @@ def applyScale(data):
 
     return [data, bottom, top - bottom]
 
-def removeScale(data):
-    data[0] = (data[0]*data[1]) + data[2]
-    return data[0]
+def removeScale(data, flat, middle):
+    return (data*middle) + flat
 
 def computeError(originalData, decompressedData):
+    percentageChange = ((originalData - decompressedData) / originalData) * 100
     residuals = originalData - decompressedData
-    print(residuals)
     residualErrorPercentage = 100*(residuals / originalData)
-    print(residualErrorPercentage.mean())
     return residualErrorPercentage.mean()
 
 for i in filenames.to_list():
     if os.path.exists(raw_data_path+i+".csv"):
         # dfs.append(pd.read_csv(raw_data_path + i + ".csv"))
+        print("Now compressing file: " + raw_data_path + i + ".csv")
         data = pd.read_csv(raw_data_path + i + ".csv")
         data["velocity(m/s)"].plot()
         #plt.show()
         
-        compData = applyScale(data["velocity(m/s)"])
+        compressedData = applyScale(data["velocity(m/s)"])
         originalData = data["velocity(m/s)"]
+        
         counter = 1
         # rewrite this function for optimization pls
-        while(computeError(originalData, removeScale(compData) < 0.0475)):
-            compData[0] = compData[0].round(64 - counter)
+        while(computeError(originalData, removeScale(compressedData[0],compressedData[1],compressedData[2])) < 0.0475):
+            compressedData[0] = compressedData[0].round(32 - counter)
             counter += 1
 
-        print("final error: ",computeError(originalData, removeScale(compData)))
+        print("MSE: ",computeError(originalData, removeScale(compressedData[0],compressedData[1],compressedData[2])))
 
-        decimalPlaces = 64 - counter + 1
-        print("decimals is: ", decimalPlaces)
+        decimalPlaces = 32 - counter + 1
+        print("Decimal multiplication is: ", decimalPlaces)
 
-        compData[0] *= 10**(decimalPlaces)
+        compressedData[0] *= 10**(decimalPlaces)
         
-        finalData = pd.concat([data["time_rel(sec)"], pd.Series(compData[0])], axis=1)
+        finalData = pd.concat([data["time_rel(sec)"], pd.Series(compressedData[0])], axis=1)
         timestamp = data["time_abs(%Y-%m-%dT%H:%M:%S.%f)"].iloc[0]
 
 
-        with open("metadata_", i, ".txt", 'w') as file:
-            file.write(data[1],"\n")
-            file.write(data[2],"\n")
-            file.write(str(decimalPlaces), "\n")
-        finalData.to_csv(raw_data_path + "Compressed_" + i + "_"+ timestamp + ".csv", sep=',', index=False)
         
-        break
+        finalData.to_csv(raw_data_path + "Metadata_" + i +"_" + str(decimalPlaces) + "_"+ timestamp + ".csv", sep=',', index=False)
+        print("Compressing complete")
+        
+        
 
         
