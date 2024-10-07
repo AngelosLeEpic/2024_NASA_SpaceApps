@@ -1,10 +1,6 @@
 # Import libraries
 import numpy as np
 import pandas as pd
-from obspy import read
-from datetime import datetime, timedelta
-import matplotlib.pyplot as plt
-import os
 from scipy.io import wavfile
 
 # data path = where we store the data, plots and catalogue
@@ -21,15 +17,15 @@ tmp = pd.read_csv(raw_data_path + filename + ".csv").iloc[73400:74400]
 # print(tmp.size)
 
 points = tmp["velocity(m/s)"]
-timer_a = np.array(tmp["time_rel(sec)"])
+timer_original = np.array(tmp["time_rel(sec)"])
 
 t_n = 0
 timer = []
 # print(len(timer_a))
 # print(timer_a)
 
-for i in range(len(timer_a) - 1):
-    timer.append(timer_a[i + 1] - timer_a[i])
+for i in range(len(timer_original) - 1):
+    timer.append(timer_original[i + 1] - timer_original[i])
 timer.append(0)
 timer = np.array(timer)
 
@@ -71,7 +67,7 @@ for t in range(
     note = int(yf[t])
     duration = zf[t]
     frequency = scale[note]
-    volume = vf[t]  ## 2048
+    volume = vf[t]  # 2048
     new_wave = get_sine_wave(frequency, duration=zf[t], amplitude=vf[t])
     wave = np.concatenate((wave, new_wave))
 wavfile.write("sound.wav", rate=44100, data=wave.astype(np.int16))
