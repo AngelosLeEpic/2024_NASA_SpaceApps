@@ -11,7 +11,7 @@
   <li>Download Nasa seismic data</li>
   <li>unzip Nasa seismic data</li>
   <li>move the <code>data</code> file into the cloned repo</li>
-  <li>run <code>pip install -r requirments.txt</code></li>
+  <li>run <code>pip install -r requirements.txt</code></li>
   <li>now you can run the code e.g. <code>python3 main.py</code></li>
 </ul> 
 
