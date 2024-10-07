@@ -28,47 +28,50 @@ timer = []
 # print(len(timer_a))
 # print(timer_a)
 
-for i in range(len(timer_a)-1):
-    timer.append(timer_a[i+1]-timer_a[i])
+for i in range(len(timer_a) - 1):
+    timer.append(timer_a[i + 1] - timer_a[i])
 timer.append(0)
 timer = np.array(timer)
 
-scale=[] 
-for k in range(35, 65): 
-    note=440*2**((k-49)/12)
-    if k%12 != 0 and k%12 != 2 and k%12 != 5 and k%12 != 7 and k%12 != 10:
-        scale.append(note) # add musical note (skip half tones)
-n_notes = len(scale) # number of musical notes
+scale = []
+for k in range(35, 65):
+    note = 440 * 2 ** ((k - 49) / 12)
+    if k % 12 != 0 and k % 12 != 2 and k % 12 != 5 and k % 12 != 7 and k % 12 != 10:
+        scale.append(note)  # add musical note (skip half tones)
+n_notes = len(scale)  # number of musical notes
 
 # frequency
 y = np.array(points)
 min = np.min(y)
 max = np.max(y)
-yf = (10*(y-min)/(max-min)) 
+yf = 10 * (y - min) / (max - min)
 
 # volume
 v = np.array(points)
 min = np.min(v)
 max = np.max(v)
-vf = 5000 + 5000*(1 - (v-min)/(max-min))
+vf = 5000 + 5000 * (1 - (v - min) / (max - min))
 
 # duration
 zf = np.array(timer)
 
+
 def get_sine_wave(frequency, duration, sample_rate=44100, amplitude=4096):
-    t = np.linspace(0, duration, int(sample_rate*duration))
-    wave = amplitude*np.sin(2*np.pi*frequency*t)
+    t = np.linspace(0, duration, int(sample_rate * duration))
+    wave = amplitude * np.sin(2 * np.pi * frequency * t)
     return wave
+
 
 print(len(vf), len(yf), len(zf))
 
-wave=[]
-for t in range(len(vf)): # loop over dataset observations, create one note per observation
+wave = []
+for t in range(
+    len(vf)
+):  # loop over dataset observations, create one note per observation
     note = int(yf[t])
     duration = zf[t]
-    frequency = scale[note]    
+    frequency = scale[note]
     volume = vf[t]  ## 2048
-    new_wave = get_sine_wave(frequency, duration = zf[t], amplitude = vf[t])
-    wave = np.concatenate((wave,new_wave))
-wavfile.write('sound.wav', rate=44100, data=wave.astype(np.int16))
-
+    new_wave = get_sine_wave(frequency, duration=zf[t], amplitude=vf[t])
+    wave = np.concatenate((wave, new_wave))
+wavfile.write("sound.wav", rate=44100, data=wave.astype(np.int16))
